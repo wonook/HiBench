@@ -310,11 +310,11 @@ do
         APP_ID=`cat ${WORKLOAD_RESULT_FOLDER}/bench.log  | grep -oP "application_[0-9]*_[0-9]*" | tail -n 1`
         echo "parsing result... $APP_ID"
         sleep 5
-        ~/hadoop/bin/yarn logs -applicationId $APP_ID > $DIR/${mode}-yarn.log
+        ~/hadoop/bin/yarn logs -applicationId $APP_ID > $DIR/${mode}-${cost}-yarn.log
 
         # history parsing 
         if [[ ${#APP_ID} -gt 5 ]]; then
-            hdfs dfs -get /spark_history/$APP_ID $DIR/${mode}-sparkhistory.txt
+            hdfs dfs -get /spark_history/$APP_ID $DIR/${mode}-${cost}-sparkhistory.txt
         fi
     fi
 
@@ -327,9 +327,9 @@ do
     ### Slack Summary
     ######################
 
-    EXCEPTION=`cat $DIR/${mode}-bench.log | grep Exception | head -3`
-    CANCEL=`cat $DIR/${mode}-bench.log | grep 'cancelled because' | head -3`
-    ABORT=`cat $DIR/${mode}-bench.log | grep aborted | head -3`
+    EXCEPTION=`cat $DIR/${mode}-${cost}-bench.log | grep Exception | head -3`
+    CANCEL=`cat $DIR/${mode}-${cost}-bench.log | grep 'cancelled because' | head -3`
+    ABORT=`cat $DIR/${mode}-${cost}-bench.log | grep aborted | head -3`
 
     message="Successful run!\n"
     if [ -z "${EXCEPTION// }" ]; then

@@ -5,4 +5,12 @@ message="${@:1}"
 
 echo "send message $message"
 
-curl -X POST --data-urlencode "payload={\"channel\": \"#disagg-eval\", \"username\": \"ubuntu\", \"text\": \"$message.\", \"icon_emoji\": \":fries:\"}" https://hooks.slack.com/services/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
+
+  local secret
+  if [[ -f ~/wonook_scripts/nemoqa/slack.secret ]]; then
+    secret=$(cat ~/wonook_scripts/nemoqa/slack.secret)
+    curl -X POST --data-urlencode "payload={\"text\": \"$1\"}" "$secret"
+curl -X POST --data-urlencode "payload={\"channel\": \"#disagg-eval\", \"username\": \"ubuntu\", \"text\": \"$message.\", \"icon_emoji\": \":fries:\"}" "$secret"
+  fi
+
+
