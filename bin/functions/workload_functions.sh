@@ -183,6 +183,51 @@ function dir_size() {
 }
 
 function run_spark_job() {
+
+DATE=`date +"%m-%d"`
+TIMESTAMP=`timestamp`
+DAG_PATH=""        
+
+for cost in LRU LRC MRD GD
+do
+
+for mode in "profiling" "actual"
+do
+    DIR=${WORKLOAD_RESULT_FOLDER}/$DATE/${cost}-${YARN_NUM_EXECUTORS}executors-${YARN_EXECUTOR_CORES}cores-${SPARK_YARN_EXECUTOR_MEMORY}mem-${SPARK_YARN_DRIVER_MEMORY}drivermem-${TIMESTAMP}
+    mkdir -p $DIR
+    EXTRA_ARGS=""
+
+    if $mode == "profiling"; then
+        echo "Running profiling"
+        SAMPLING_TIMEOUT=60
+        SAMPLING_JOBS=1
+
+        EXTRA_ARGS="--conf 'spark.blaze.isProfileRun=true' "
+
+        # ./bin/spark_killer.sh $SAMPLING_TIMEOUT &
+    elif $DAG_PATH != ""; then
+        echo "Running actual based on $DAG_PATH"
+
+        AUTOCACHING=false
+        SAMPLING_JOBS=1
+        LAZY_AUTOCACHING=false
+        AUTOUNPERSIST=false
+        EXTRA_ARGS="--conf 'spark.blaze.dagPath=$DAG_PATH' \
+            --conf 'spark.blaze.autoCaching=$AUTOCACHING' \
+            --conf 'spark.blaze.isProfileRun=false' \
+            --conf 'spark.blaze.profileNumJobs=$SAMPLING_JOBS' \
+            --conf 'spark.blaze.lazyAutoCaching=$LAZY_AUTOCACHING' \
+            --conf 'spark.blaze.autoUnpersist=$AUTOUNPERSIST' \
+            --conf 'spark.blaze.costFunction=$cost'"
+    else
+        echo "NO DAG_PATH provided! Run profiling first to run blaze."
+            exit
+    fi
+
+    ###########
+    ## EXECUTE
+    ###########
+
     LIB_JARS=
     while (($#)); do
       if [ "$1" = "--jars" ]; then
@@ -221,7 +266,9 @@ function run_spark_job() {
     fi
     echo -e "${BGreen}Submit Spark job: ${Green}${SUBMIT_CMD}${Color_Off}"
     MONITOR_PID=`start_monitor`
+    start_time="$(date -u +%s)"
     execute_withlog ${SUBMIT_CMD}
+    end_time="$(date -u +%s)"
     result=$?
     stop_monitor ${MONITOR_PID}
     if [ $result -ne 0 ]
@@ -231,8 +278,82 @@ function run_spark_job() {
         tail ${WORKLOAD_RESULT_FOLDER}/bench.log
         exit $result
     else
-	echo "successfully ended: find the log at ${WORKLOAD_RESULT_FOLDER}/bench.log"
+    	echo "successfully ended: find the log at ${WORKLOAD_RESULT_FOLDER}/bench.log"
     fi
+
+    ###########
+    ## EXTRA
+    ###########
+
+    if $mode == "profiling"
+    then
+        # get dag path 
+        APP_ID=`cat ${WORKLOAD_RESULT_FOLDER}/bench.log  | grep -oP "application_[0-9]*_[0-9]*" | tail -n 1`
+        echo "Getting sampled lineage... $APP_ID"
+        sleep 5
+        hdfs dfs -get /spark_history/$APP_ID $DIR/sampled_lineage.txt
+        if [ ! -f "$DIR/sampled_lineage.txt" ]; then
+            hdfs dfs -get /spark_history/"${APP_ID}.inprogress" $DIR/sampled_lineage.txt
+        fi
+        DAG_PATH=$DIR/sampled_lineage.txt
+    else
+        # get dag path 
+        APP_ID=`cat ${WORKLOAD_RESULT_FOLDER}/bench.log  | grep -oP "application_[0-9]*_[0-9]*" | tail -n 1`
+        echo "parsing result... $APP_ID"
+        sleep 5
+        ~/hadoop/bin/yarn logs -applicationId $APP_ID > $DIR/${mode}-yarn.log
+
+        # history parsing 
+        if [[ ${#APP_ID} -gt 5 ]]; then
+            hdfs dfs -get /spark_history/$APP_ID $DIR/${mode}-sparkhistory.txt
+        fi
+    fi
+
+    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $DIR/${mode}-bench.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $DIR/${mode}-monitor.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $DIR/${mode}-monitor.html
+    echo "successfully ended: find the log at ${DIR}"
+
+    ######################
+    ### Slack Summary
+    ######################
+
+    EXCEPTION=`cat $DIR/${mode}-bench.log | grep Exception | head -3`
+    CANCEL=`cat $DIR/${mode}-bench.log | grep cancelled because | head -3`
+    ABORT=`cat $DIR/${mode}-bench.log | grep aborted | head -3`
+
+    if [ -z "${EXCEPTION// }" ]; then
+    echo "No exception"
+    else
+        message="Exception happended! $EXCEPTION\n"
+    fi
+    if [ -z "${CANCEL// }" ]; then
+    echo "No cancellation"
+    else
+        message="Job cancelled! $CANCEL\n"
+    fi
+    if [ -z "${ABORT// }" ]; then
+    echo "Not aborted"
+    else
+        message="Job aborted! $ABORT\n"
+    fi
+
+    COMMIT=`git log --pretty=format:'%h' -n 1`
+    jct="$(($end_time-$start_time))"
+    # sampling_time="$(($sampling_end-$sampling_start))"
+
+    message=$message" git commit $COMMIT\n"
+    message=$message" $DIR\n"
+    message=$message" App $APP_ID for $benchmark on $framework with $cost\n"
+    # message=$message" Args $ARGS\n"
+    # message=$message" Profiling $sampling_time sec (timeout $SAMPLING_TIMEOUT)\n"
+    message=$message" $mode JCT $jct sec\n"
+
+    ./scripts/send_slack.sh  $message
+    #####
+
+done
+done
 }
 
 function run_storm_job(){
