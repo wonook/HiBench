@@ -231,11 +231,7 @@ function run_spark_job() {
         tail ${WORKLOAD_RESULT_FOLDER}/bench.log
         exit $result
     else
-	TIMESTAMP=`timestamp`
-	mv ${WORKLOAD_RESULT_FOLDER}/bench.log ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}bench.log
-	mv ${WORKLOAD_RESULT_FOLDER}/monitor.log ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}monitor.log
-	mv ${WORKLOAD_RESULT_FOLDER}/monitor.html ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}monitor.html
-	echo "successfully ended: find the log at ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}bench.log"
+	echo "successfully ended: find the log at ${WORKLOAD_RESULT_FOLDER}/bench.log"
     fi
 }
 
