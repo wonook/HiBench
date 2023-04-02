@@ -62,7 +62,7 @@ object InMemorySourceProvider {
 
     override def onNext(msg: Message): Unit = {
       if (times < MAX) {
-        TEXT_TO_SPLIT.lines.foreach { line =>
+        TEXT_TO_SPLIT.linesIterator.foreach { line =>
           taskContext.output(Message(line, System.currentTimeMillis()))
         }
         times += 1

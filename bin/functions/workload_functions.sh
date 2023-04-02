@@ -230,6 +230,12 @@ function run_spark_job() {
         echo -e "${BBlue}Hint${Color_Off}: You can goto ${BYellow}${WORKLOAD_RESULT_FOLDER}/bench.log${Color_Off} to check for detailed log.\nOpening log tail for you:\n"
         tail ${WORKLOAD_RESULT_FOLDER}/bench.log
         exit $result
+    else
+	TIMESTAMP=`timestamp`
+	mv ${WORKLOAD_RESULT_FOLDER}/bench.log ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}bench.log
+	mv ${WORKLOAD_RESULT_FOLDER}/monitor.log ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}monitor.log
+	mv ${WORKLOAD_RESULT_FOLDER}/monitor.html ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}monitor.html
+	echo "successfully ended: find the log at ${WORKLOAD_RESULT_FOLDER}/${TIMESTAMP}bench.log"
     fi
 }
 

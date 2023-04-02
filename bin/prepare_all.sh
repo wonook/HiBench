@@ -20,7 +20,7 @@ root_dir=`cd "${current_dir}/.."; pwd`
 
 . ${root_dir}/bin/functions/color.sh
 
-for benchmark in `cat $root_dir/conf/benchmarks_run.lst`; do
+for benchmark in `cat $root_dir/conf/benchmarks.lst`; do
     if [[ $benchmark == \#* ]]; then
         continue
     fi
@@ -29,8 +29,8 @@ for benchmark in `cat $root_dir/conf/benchmarks_run.lst`; do
     benchmark="${benchmark/.//}"
 
     WORKLOAD=$root_dir/bin/workloads/${benchmark}
-    #echo -e "${BCyan}Exec script: ${Cyan}${WORKLOAD}/prepare/prepare.sh${Color_Off}"
-    #"${WORKLOAD}/prepare/prepare.sh"
+    echo -e "${BCyan}Exec script: ${Cyan}${WORKLOAD}/prepare/prepare.sh${Color_Off}"
+    "${WORKLOAD}/prepare/prepare.sh"
 
     result=$?
     if [ $result -ne 0 ]
@@ -98,7 +98,7 @@ for benchmark in `cat $root_dir/conf/benchmarks_run.lst`; do
 
     echo -e "${UYellow}${BYellow}Run ${Yellow}${UYellow}${benchmark}/${framework}${Color_Off}"
     echo -e "${BCyan}Exec script: ${Cyan}$WORKLOAD/${framework}/run.sh${Color_Off}"
-    $WORKLOAD/${framework}/run.sh
+    #$WORKLOAD/${framework}/run.sh
 
     result=$?
     if [ $result -ne 0 ]

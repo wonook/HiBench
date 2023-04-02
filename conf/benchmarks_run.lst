@@ -22,11 +22,11 @@ ml.gbt
 ml.rf
 ml.svd
 ml.linear
-ml.lda
 ml.svm
 ml.gmm
-ml.correlation
 ml.summarizer
+#ml.lda
+#ml.correlation
 
 #
 #graph.nweight
