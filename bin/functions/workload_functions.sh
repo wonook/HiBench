@@ -183,51 +183,6 @@ function dir_size() {
 }
 
 function run_spark_job() {
-
-DATE=`date +"%m-%d"`
-TIMESTAMP=`timestamp`
-DAG_PATH=""        
-
-for cost in LRU LRC MRD GD
-do
-
-for mode in "profiling" "actual"
-do
-    DIR=${WORKLOAD_RESULT_FOLDER}/$DATE/${cost}-${YARN_NUM_EXECUTORS}executors-${YARN_EXECUTOR_CORES}cores-${SPARK_YARN_EXECUTOR_MEMORY}mem-${SPARK_YARN_DRIVER_MEMORY}drivermem-${TIMESTAMP}
-    mkdir -p $DIR
-    EXTRA_ARGS=""
-
-    if $mode == "profiling"; then
-        echo "Running profiling"
-        SAMPLING_TIMEOUT=60
-        SAMPLING_JOBS=1
-
-        EXTRA_ARGS="--conf 'spark.blaze.isProfileRun=true' "
-
-        # ./bin/spark_killer.sh $SAMPLING_TIMEOUT &
-    elif $DAG_PATH != ""; then
-        echo "Running actual based on $DAG_PATH"
-
-        AUTOCACHING=false
-        SAMPLING_JOBS=1
-        LAZY_AUTOCACHING=false
-        AUTOUNPERSIST=false
-        EXTRA_ARGS="--conf 'spark.blaze.dagPath=$DAG_PATH' \
-            --conf 'spark.blaze.autoCaching=$AUTOCACHING' \
-            --conf 'spark.blaze.isProfileRun=false' \
-            --conf 'spark.blaze.profileNumJobs=$SAMPLING_JOBS' \
-            --conf 'spark.blaze.lazyAutoCaching=$LAZY_AUTOCACHING' \
-            --conf 'spark.blaze.autoUnpersist=$AUTOUNPERSIST' \
-            --conf 'spark.blaze.costFunction=$cost'"
-    else
-        echo "NO DAG_PATH provided! Run profiling first to run blaze."
-            exit
-    fi
-
-    ###########
-    ## EXECUTE
-    ###########
-
     LIB_JARS=
     while (($#)); do
       if [ "$1" = "--jars" ]; then
@@ -240,6 +195,60 @@ do
 
     CLS=$1
     shift
+
+
+DATE=`date +"%m-%d"`
+TIMESTAMP=`timestamp`
+DAG_PATH=""        
+
+for autocaching in false true
+do
+
+for cost in LRU LFU Size LRC MRD GD None
+do
+
+for mode in "profiling" "actual"
+do
+
+    DIR=${WORKLOAD_RESULT_FOLDER}/$DATE/${YARN_NUM_EXECUTORS}executors-${YARN_EXECUTOR_CORES}cores-${SPARK_YARN_EXECUTOR_MEMORY}mem-${SPARK_YARN_DRIVER_MEMORY}drivermem-${TIMESTAMP}
+    mkdir -p $DIR
+    EXTRA_ARGS=""
+    
+    echo mode $mode
+
+    if [ "$mode" = "profiling" ] && [ "${DAG_PATH}" == "" ]; then
+        echo "Running profiling"
+        SAMPLING_TIMEOUT=60
+        SAMPLING_JOBS=1
+
+        EXTRA_ARGS="--conf 'spark.blaze.isProfileRun=true' "
+
+        # ./bin/spark_killer.sh $SAMPLING_TIMEOUT &
+    elif [ "$mode" = "actual" ] && [ "${DAG_PATH}" != "" ]; then
+        echo "Running actual based on $DAG_PATH"
+
+        AUTOCACHING=$autocaching
+        SAMPLING_JOBS=1
+        LAZY_AUTOCACHING=false
+        AUTOUNPERSIST=false
+        EXTRA_ARGS="--conf 'spark.blaze.dagPath=$DAG_PATH' \
+            --conf 'spark.blaze.autoCaching=$AUTOCACHING' \
+            --conf 'spark.blaze.isProfileRun=false' \
+            --conf 'spark.blaze.profileNumJobs=$SAMPLING_JOBS' \
+            --conf 'spark.blaze.lazyAutoCaching=$LAZY_AUTOCACHING' \
+            --conf 'spark.blaze.autoUnpersist=$AUTOUNPERSIST' \
+            --conf 'spark.blaze.costFunction=$cost'"
+    elif [ "$mode" = "profiling" ]; then
+        echo "skipping profiling.."
+        continue
+    else
+        echo "NO DAG_PATH provided! Run profiling first to run blaze."
+	exit
+    fi
+
+    ###########
+    ## EXECUTE
+    ###########
 
     export_withlog SPARKBENCH_PROPERTIES_FILES
 
@@ -285,7 +294,7 @@ do
     ## EXTRA
     ###########
 
-    if $mode == "profiling"
+    if [ "$mode" = "profiling" ]
     then
         # get dag path 
         APP_ID=`cat ${WORKLOAD_RESULT_FOLDER}/bench.log  | grep -oP "application_[0-9]*_[0-9]*" | tail -n 1`
@@ -309,9 +318,9 @@ do
         fi
     fi
 
-    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $DIR/${mode}-bench.log
-    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $DIR/${mode}-monitor.log
-    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $DIR/${mode}-monitor.html
+    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $DIR/${mode}-${cost}-bench.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $DIR/${mode}-${cost}-monitor.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $DIR/${mode}-${cost}-monitor.html
     echo "successfully ended: find the log at ${DIR}"
 
     ######################
@@ -319,9 +328,10 @@ do
     ######################
 
     EXCEPTION=`cat $DIR/${mode}-bench.log | grep Exception | head -3`
-    CANCEL=`cat $DIR/${mode}-bench.log | grep cancelled because | head -3`
+    CANCEL=`cat $DIR/${mode}-bench.log | grep 'cancelled because' | head -3`
     ABORT=`cat $DIR/${mode}-bench.log | grep aborted | head -3`
 
+    message="Successful run!\n"
     if [ -z "${EXCEPTION// }" ]; then
     echo "No exception"
     else
@@ -344,14 +354,15 @@ do
 
     message=$message" git commit $COMMIT\n"
     message=$message" $DIR\n"
-    message=$message" App $APP_ID for $benchmark on $framework with $cost\n"
+    message=$message" App $APP_ID for ${WORKLOAD_RESULT_FOLDER} with $cost\n"
     # message=$message" Args $ARGS\n"
     # message=$message" Profiling $sampling_time sec (timeout $SAMPLING_TIMEOUT)\n"
     message=$message" $mode JCT $jct sec\n"
 
-    ./scripts/send_slack.sh  $message
+    ./bin/send_slack.sh  $message
     #####
 
+done
 done
 done
 }
