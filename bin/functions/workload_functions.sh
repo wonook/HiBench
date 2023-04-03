@@ -219,10 +219,12 @@ START_TIME=`timestamp`
 
 
     DIR=${WORKLOAD_RESULT_FOLDER}/$DATE/${YARN_NUM_EXECUTORS}executors-${YARN_EXECUTOR_CORES}cores-${SPARK_YARN_EXECUTOR_MEMORY}mem-${SPARK_YARN_DRIVER_MEMORY}drivermem-${TIMESTAMP}
-    mkdir -p $DIR
+    AUTODIR=$DIR/autocaching
+    #mkdir -p $DIR
+    mkdir -p $AUTODIR
     EXTRA_ARGS=""
     
-    echo mode $mode
+    echo mode $mode - $cost - autocache $autocaching
 
     if [ "$mode" = "profiling" ] && [ "${DAG_PATH}" == "" ]; then
         echo "Running profiling"
@@ -230,6 +232,7 @@ START_TIME=`timestamp`
         SAMPLING_JOBS=1
 
         EXTRA_ARGS="--conf 'spark.blaze.isProfileRun=true' "
+	COST=""
 
         # ./bin/spark_killer.sh $SAMPLING_TIMEOUT &
     elif [ "$mode" = "actual" ] && [ "${DAG_PATH}" != "" ]; then
@@ -239,13 +242,14 @@ START_TIME=`timestamp`
         SAMPLING_JOBS=1
         LAZY_AUTOCACHING=false
         AUTOUNPERSIST=false
+	COST=$cost
         EXTRA_ARGS="--conf 'spark.blaze.dagPath=$DAG_PATH' \
             --conf 'spark.blaze.autoCaching=$AUTOCACHING' \
             --conf 'spark.blaze.isProfileRun=false' \
             --conf 'spark.blaze.profileNumJobs=$SAMPLING_JOBS' \
             --conf 'spark.blaze.lazyAutoCaching=$LAZY_AUTOCACHING' \
             --conf 'spark.blaze.autoUnpersist=$AUTOUNPERSIST' \
-            --conf 'spark.blaze.costFunction=$cost'"
+            --conf 'spark.blaze.costFunction=$COST'"
     elif [ "$mode" = "profiling" ]; then
         echo "skipping profiling.."
         continue
@@ -318,54 +322,66 @@ START_TIME=`timestamp`
         APP_ID=`cat ${WORKLOAD_RESULT_FOLDER}/bench.log  | grep -oP "application_[0-9]*_[0-9]*" | tail -n 1`
         echo "parsing result... $APP_ID"
         sleep 5
-        ~/hadoop/bin/yarn logs -applicationId $APP_ID > $DIR/${mode}-${cost}-yarn.log
+        ~/hadoop/bin/yarn logs -applicationId $APP_ID > ${WORKLOAD_RESULT_FOLDER}/yarn.log
 
         # history parsing 
         if [[ ${#APP_ID} -gt 5 ]]; then
-            hdfs dfs -get /spark_history/$APP_ID $DIR/${mode}-${cost}-sparkhistory.txt
+            hdfs dfs -get /spark_history/$APP_ID ${WORKLOAD_RESULT_FOLDER}/sparkhistory.log
         fi
     fi
 
-    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $DIR/${mode}-${cost}-bench.log
-    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $DIR/${mode}-${cost}-monitor.log
-    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $DIR/${mode}-${cost}-monitor.html
+    if [ $autocaching = "true" ]; then
+    mv ${WORKLOAD_RESULT_FOLDER}/yarn.log $AUTODIR/${mode}-${COST}-yarn.log
+    mv ${WORKLOAD_RESULT_FOLDER}/sparkhistory.log $AUTODIR/${mode}-${COST}-sparkhistory.log
+    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $AUTODIR/${mode}-${COST}-bench.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $AUTODIR/${mode}-${COST}-monitor.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $AUTODIR/${mode}-${COST}-monitor.html
+    echo "successfully ended: find the log at ${AUTODIR}"
+ 
+    else
+    mv ${WORKLOAD_RESULT_FOLDER}/yarn.log $DIR/${mode}-${COST}-yarn.log
+    mv ${WORKLOAD_RESULT_FOLDER}/sparkhistory.log $DIR/${mode}-${COST}-sparkhistory.log
+    mv ${WORKLOAD_RESULT_FOLDER}/bench.log $DIR/${mode}-${COST}-bench.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.log $DIR/${mode}-${COST}-monitor.log
+    mv ${WORKLOAD_RESULT_FOLDER}/monitor.html $DIR/${mode}-${COST}-monitor.html
     echo "successfully ended: find the log at ${DIR}"
+    fi
 
     ######################
     ### Slack Summary
     ######################
 
-    EXCEPTION=`cat $DIR/${mode}-${cost}-bench.log | grep Exception | head -3`
-    CANCEL=`cat $DIR/${mode}-${cost}-bench.log | grep 'cancelled because' | head -3`
-    ABORT=`cat $DIR/${mode}-${cost}-bench.log | grep aborted | head -3`
+    EXCEPTION=`cat $DIR/${mode}-${COST}-bench.log | grep Exception | head -3`
+    CANCEL=`cat $DIR/${mode}-${COST}-bench.log | grep 'cancelled because' | head -3`
+    ABORT=`cat $DIR/${mode}-${COST}-bench.log | grep aborted | head -3`
 
-    message="Successful run!\n"
+    message=":rocket: *Successful run!*\n"
     if [ -z "${EXCEPTION// }" ]; then
     echo "No exception"
     else
-        message="Exception happended! $EXCEPTION\n"
+        message=":boom: *Exception happended! $EXCEPTION*\n"
     fi
     if [ -z "${CANCEL// }" ]; then
     echo "No cancellation"
     else
-        message="Job cancelled! $CANCEL\n"
+        message=":boom: *Job cancelled! $CANCEL*\n"
     fi
     if [ -z "${ABORT// }" ]; then
     echo "Not aborted"
     else
-        message="Job aborted! $ABORT\n"
+        message=":boom: *Job aborted! $ABORT*\n"
     fi
 
     COMMIT=`git log --pretty=format:'%h' -n 1`
     jct="$(($end_time-$start_time))"
     # sampling_time="$(($sampling_end-$sampling_start))"
 
-    message=$message" git commit $COMMIT\n"
-    message=$message" $DIR\n"
-    message=$message" App $APP_ID for ${WORKLOAD_RESULT_FOLDER} with $cost\n"
+    message="$message*Result:* _$mode-$COST-autocache:${autocaching}_ JCT: *$jct sec*\n"
+    message="$message*git commit*: $COMMIT\n"
+    message="$message*DIR*: $DIR\n"
+    message="$message*App ID*: $APP_ID\n"
     # message=$message" Args $ARGS\n"
     # message=$message" Profiling $sampling_time sec (timeout $SAMPLING_TIMEOUT)\n"
-    message=$message" $mode JCT $jct sec\n"
 
     ./bin/send_slack.sh  $message
     #####

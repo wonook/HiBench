@@ -1,4 +1,4 @@
-micro.sleep
+#micro.sleep
 micro.sort
 micro.terasort
 micro.wordcount
