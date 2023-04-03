@@ -39,7 +39,7 @@ if [ ${BAYES_USE_DENSE} != "true" ]; then
           -o sequence"
   run_hadoop_job ${DATATOOLS} HiBench.DataGen ${OPTION}
 fi
-run_spark_job --jars ${DATATOOLS} HiBench.BayesDataGen --input ${INPUT_HDFS} --output ${INPUT_HDFS}.parquet \
+run_spark_prepare_job --jars ${DATATOOLS} HiBench.BayesDataGen --input ${INPUT_HDFS} --output ${INPUT_HDFS}.parquet \
   --useDense ${BAYES_USE_DENSE} \
   --examples ${BAYES_DENSE_EXAMPLES} \
   --features ${BAYES_DENSE_FEATURES} \

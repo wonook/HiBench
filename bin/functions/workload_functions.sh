@@ -182,6 +182,57 @@ function dir_size() {
     done
 }
 
+function run_spark_prepare_job() {
+    LIB_JARS=
+    while (($#)); do
+      if [ "$1" = "--jars" ]; then
+        LIB_JARS="--jars $2"
+        shift 2
+        continue
+      fi
+      break
+    done
+
+    CLS=$1
+    shift
+
+    export_withlog SPARKBENCH_PROPERTIES_FILES
+
+    YARN_OPTS=""
+    if [[ "$SPARK_MASTER" == yarn-* ]] || [[ "$SPARK_MASTER" == yarn ]]; then
+        export_withlog HADOOP_CONF_DIR
+        
+        YARN_OPTS="--num-executors ${YARN_NUM_EXECUTORS}"
+        if [[ -n "${YARN_EXECUTOR_CORES:-}" ]]; then
+            YARN_OPTS="${YARN_OPTS} --executor-cores ${YARN_EXECUTOR_CORES}"
+       fi
+       if [[ -n "${SPARK_YARN_EXECUTOR_MEMORY:-}" ]]; then
+           YARN_OPTS="${YARN_OPTS} --executor-memory ${SPARK_YARN_EXECUTOR_MEMORY}"
+       fi
+       if [[ -n "${SPAKR_YARN_DRIVER_MEMORY:-}" ]]; then
+           YARN_OPTS="${YARN_OPTS} --driver-memory ${SPARK_YARN_DRIVER_MEMORY}"
+       fi
+    fi
+    if [[ "$CLS" == *.py ]]; then 
+        LIB_JARS="$LIB_JARS --jars ${SPARKBENCH_JAR}"
+        SUBMIT_CMD="${SPARK_HOME}/bin/spark-submit ${LIB_JARS} --properties-file ${SPARK_PROP_CONF} --master ${SPARK_MASTER} ${YARN_OPTS} ${CLS} $@"
+    else
+        SUBMIT_CMD="${SPARK_HOME}/bin/spark-submit ${LIB_JARS} --properties-file ${SPARK_PROP_CONF} --class ${CLS} --master ${SPARK_MASTER} ${YARN_OPTS} ${SPARKBENCH_JAR} $@"
+    fi
+    echo -e "${BGreen}Submit Spark job: ${Green}${SUBMIT_CMD}${Color_Off}"
+    MONITOR_PID=`start_monitor`
+    execute_withlog ${SUBMIT_CMD}
+    result=$?
+    stop_monitor ${MONITOR_PID}
+    if [ $result -ne 0 ]
+    then
+        echo -e "${BRed}ERROR${Color_Off}: Spark job ${BYellow}${CLS}${Color_Off} failed to run successfully."
+        echo -e "${BBlue}Hint${Color_Off}: You can goto ${BYellow}${WORKLOAD_RESULT_FOLDER}/bench.log${Color_Off} to check for detailed log.\nOpening log tail for you:\n"
+        tail ${WORKLOAD_RESULT_FOLDER}/bench.log
+        exit $result
+    fi
+}
+
 function run_spark_job() {
     LIB_JARS=
     while (($#)); do
@@ -225,6 +276,11 @@ START_TIME=`timestamp`
     EXTRA_ARGS=""
     
     echo mode $mode - $cost - autocache $autocaching
+
+    if [ "$BENCHMARK" = "ml/als" ] || [ "$BENCHMARK" = "ml/linear" ] && [ "$autocaching" == "true" ]; then
+	    echo "skipping als autocaching.."
+	    continue
+    fi
 
     if [ "$mode" = "profiling" ] && [ "${DAG_PATH}" == "" ]; then
         echo "Running profiling"

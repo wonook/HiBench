@@ -13,7 +13,6 @@ micro.dfsioe
 #websearch.nutchindexing
 websearch.pagerank
 
-ml.bayes
 ml.kmeans
 ml.lr
 ml.als
@@ -21,12 +20,14 @@ ml.pca
 ml.gbt
 ml.rf
 ml.svd
-ml.linear
-ml.lda
 ml.svm
 ml.gmm
-ml.correlation
+ml.xgboost
 ml.summarizer
+ml.bayes
+ml.linear
+#ml.lda
+#ml.correlation
 
 #
 #graph.nweight

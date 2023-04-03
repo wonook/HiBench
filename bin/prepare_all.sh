@@ -96,8 +96,8 @@ for benchmark in `cat $root_dir/conf/benchmarks.lst`; do
          continue
     fi
 
-    echo -e "${UYellow}${BYellow}Run ${Yellow}${UYellow}${benchmark}/${framework}${Color_Off}"
-    echo -e "${BCyan}Exec script: ${Cyan}$WORKLOAD/${framework}/run.sh${Color_Off}"
+    #echo -e "${UYellow}${BYellow}Run ${Yellow}${UYellow}${benchmark}/${framework}${Color_Off}"
+    #echo -e "${BCyan}Exec script: ${Cyan}$WORKLOAD/${framework}/run.sh${Color_Off}"
     #$WORKLOAD/${framework}/run.sh
 
     result=$?
