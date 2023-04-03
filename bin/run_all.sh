@@ -29,6 +29,7 @@ for benchmark in `cat $root_dir/conf/benchmarks_run.lst`; do
     benchmark="${benchmark/.//}"
 
     WORKLOAD=$root_dir/bin/workloads/${benchmark}
+    export BENCHMARK=${benchmark}
     #echo -e "${BCyan}Exec script: ${Cyan}${WORKLOAD}/prepare/prepare.sh${Color_Off}"
     #"${WORKLOAD}/prepare/prepare.sh"
 

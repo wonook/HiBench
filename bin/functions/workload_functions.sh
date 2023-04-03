@@ -376,7 +376,7 @@ START_TIME=`timestamp`
     jct="$(($end_time-$start_time))"
     # sampling_time="$(($sampling_end-$sampling_start))"
 
-    message="$message*Result:* _$mode-$COST-autocache:${autocaching}_ JCT: *$jct sec*\n"
+    message="$message*Result:* _$BENCHMARK-$mode-$COST-autocache:${autocaching}_ JCT: *$jct sec*\n"
     message="$message*git commit*: $COMMIT\n"
     message="$message*DIR*: $DIR\n"
     message="$message*App ID*: $APP_ID\n"
