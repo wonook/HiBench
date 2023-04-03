@@ -21,12 +21,7 @@ workload_config=${root_dir}/conf/workloads/ml/als.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench ALS ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 OPTION="--rank $RANK_ALS \
         --numIterations $NUM_ITERATIONS_ALS \
         --implicitPrefs $IMPLICITPREFS_ALS \
@@ -34,8 +29,5 @@ OPTION="--rank $RANK_ALS \
         --numUserBlocks $USERBLOCKS_ALS \
         --lambda $LAMBDA_ALS"
 run_spark_job com.intel.hibench.sparkbench.ml.ALSExample $OPTION $INPUT_HDFS
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

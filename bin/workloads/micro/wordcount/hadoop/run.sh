@@ -21,12 +21,7 @@ workload_config=${root_dir}/conf/workloads/micro/wordcount.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench HadoopWordcount ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_hadoop_job ${HADOOP_EXAMPLES_JAR} wordcount \
     -D mapreduce.job.maps=${NUM_MAPS} \
     -D mapreduce.job.reduces=${NUM_REDS} \
@@ -35,8 +30,5 @@ run_hadoop_job ${HADOOP_EXAMPLES_JAR} wordcount \
     -D mapreduce.job.inputformat.class=org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat \
     -D mapreduce.job.outputformat.class=org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat \
     ${INPUT_HDFS} ${OUTPUT_HDFS} 
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

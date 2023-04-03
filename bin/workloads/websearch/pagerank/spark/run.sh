@@ -21,15 +21,7 @@ workload_config=${root_dir}/conf/workloads/websearch/pagerank.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench ScalaSparkPagerank ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_spark_job org.apache.spark.examples.SparkPageRank $INPUT_HDFS/edges $OUTPUT_HDFS $NUM_ITERATIONS
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

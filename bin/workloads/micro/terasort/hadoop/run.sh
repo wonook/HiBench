@@ -21,17 +21,9 @@ workload_config=${root_dir}/conf/workloads/micro/terasort.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench HadoopTerasort ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_hadoop_job ${HADOOP_EXAMPLES_JAR} terasort \
     -D mapreduce.job.reduces=${NUM_REDS} \
     ${INPUT_HDFS} ${OUTPUT_HDFS}
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

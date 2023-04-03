@@ -21,12 +21,7 @@ workload_config=${root_dir}/conf/workloads/micro/sort.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench HadoopSort ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_hadoop_job ${HADOOP_EXAMPLES_JAR} sort -outKey org.apache.hadoop.io.Text -outValue org.apache.hadoop.io.Text -r ${NUM_REDS} ${INPUT_HDFS} ${OUTPUT_HDFS}
 
 END_TIME=`timestamp`

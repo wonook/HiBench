@@ -210,6 +210,14 @@ do
 for mode in "profiling" "actual"
 do
 
+show_bannar start
+
+rmr_hdfs $OUTPUT_HDFS || true
+
+SIZE=`dir_size $INPUT_HDFS`
+START_TIME=`timestamp`
+
+
     DIR=${WORKLOAD_RESULT_FOLDER}/$DATE/${YARN_NUM_EXECUTORS}executors-${YARN_EXECUTOR_CORES}cores-${SPARK_YARN_EXECUTOR_MEMORY}mem-${SPARK_YARN_DRIVER_MEMORY}drivermem-${TIMESTAMP}
     mkdir -p $DIR
     EXTRA_ARGS=""
@@ -361,6 +369,11 @@ do
 
     ./bin/send_slack.sh  $message
     #####
+
+END_TIME=`timestamp`
+
+gen_report ${START_TIME} ${END_TIME} ${SIZE}
+show_bannar finish
 
 done
 done

@@ -20,15 +20,7 @@ workload_config=${root_dir}/conf/workloads/ml/gbt.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench GradientBoostingTree ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_spark_job com.intel.hibench.sparkbench.ml.GradientBoostedTree --numClasses $NUM_CLASSES_GBT --maxDepth $MAX_DEPTH_GBT --maxBins $MAX_BINS_GBT --numIterations $NUM_ITERATIONS_GBT --learningRate $LEARNING_RATE_GBT $INPUT_HDFS
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

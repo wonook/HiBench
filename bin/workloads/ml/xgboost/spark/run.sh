@@ -20,15 +20,7 @@ workload_config=${root_dir}/conf/workloads/ml/xgboost.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench XGBoost ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_spark_job com.intel.hibench.sparkbench.ml.XGBoost --numClasses $NUM_CLASSES_XGBOOST --maxDepth $MAX_DEPTH_XGBOOST --maxBins $MAX_BINS_XGBOOST --numIterations $NUM_ITERATIONS_XGBOOST --learningRate $LEARNING_RATE_XGBOOST $INPUT_HDFS
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

@@ -20,12 +20,7 @@ workload_config=${root_dir}/conf/workloads/ml/rf.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench RandomForest ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 OPTION="--numTrees $NUM_TREES_RF \
         --numClasses $NUM_CLASSES_RF \
         --featureSubsetStrategy $FEATURE_SUBSET_STRATEGY_RF \
@@ -33,8 +28,5 @@ OPTION="--numTrees $NUM_TREES_RF \
         --maxDepth $MAX_DEPTH_RF \
         --maxBins $MAX_BINS_RF"
 run_spark_job com.intel.hibench.sparkbench.ml.RandomForestClassification $OPTION $INPUT_HDFS
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench

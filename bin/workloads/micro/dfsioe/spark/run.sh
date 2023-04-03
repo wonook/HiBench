@@ -21,15 +21,7 @@ workload_config=${root_dir}/conf/workloads/micro/dfsioe.conf
 . "${root_dir}/bin/functions/load_bench_config.sh"
 
 enter_bench DFSIOE ${workload_config} ${current_dir}
-show_bannar start
 
-rmr_hdfs $OUTPUT_HDFS || true
-
-SIZE=`dir_size $INPUT_HDFS`
-START_TIME=`timestamp`
 run_spark_job com.intel.sparkbench.micro.ScalaDFSIOE $INPUT_HDFS $OUTPUT_HDFS $RD_NUM_OF_FILES $RD_FILE_SIZE $READ_ONLY
-END_TIME=`timestamp`
 
-gen_report ${START_TIME} ${END_TIME} ${SIZE}
-show_bannar finish
 leave_bench
