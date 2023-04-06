@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/svm.conf
 
 enter_bench SVM ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.SVMWithSGDExample --numIterations $NUM_ITERATIONS_SVM --storageLevel $SVM_STORAGE_LEVEL --stepSize $STEPSIZE_SVM --regParam $REGPARAM_SVM $INPUT_HDFS
+run_spark_job com.intel.hibench.sparkbench.ml.SVMWithSGDExample --numIterations $NUM_ITERATIONS_SVM $STORAGE_LEVEL_DEFAULT --stepSize $STEPSIZE_SVM --regParam $REGPARAM_SVM $INPUT_HDFS
 
 leave_bench

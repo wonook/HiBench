@@ -23,6 +23,6 @@ workload_config=${root_dir}/conf/workloads/ml/gmm.conf
 enter_bench GaussianMixtureModel ${workload_config} ${current_dir}
 
 
-run_spark_job com.intel.hibench.sparkbench.ml.GaussianMixtureModel -k $K_GMM --numIterations $MAX_ITERATION_GMM --storageLevel $STORAGE_LEVEL_GMM $INPUT_HDFS/samples
+run_spark_job com.intel.hibench.sparkbench.ml.GaussianMixtureModel -k $K_GMM --numIterations $MAX_ITERATION_GMM $STORAGE_LEVEL_DEFAULT $INPUT_HDFS/samples
 
 leave_bench

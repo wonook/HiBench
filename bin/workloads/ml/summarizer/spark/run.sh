@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/summarizer.conf
 
 enter_bench Summarizer ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.SummarizerExample ${INPUT_HDFS}
+run_spark_job com.intel.hibench.sparkbench.ml.SummarizerExample $STORAGE_LEVEL_DEFAULT ${INPUT_HDFS}
 
 leave_bench

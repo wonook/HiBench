@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/lda.conf
 
 enter_bench LDA ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.LDAExample --numTopics $NUM_TOPICS_LDA --maxIterations $NUM_ITERATIONS_LDA --optimizer $OPTIMIZER_LDA --maxResultSize $MAXRESULTSIZE_LDA $INPUT_HDFS $OUTPUT_HDFS
+run_spark_job com.intel.hibench.sparkbench.ml.LDAExample --numTopics $NUM_TOPICS_LDA --maxIterations $NUM_ITERATIONS_LDA --optimizer $OPTIMIZER_LDA --maxResultSize $MAXRESULTSIZE_LDA $STORAGE_LEVEL_DEFAULT $INPUT_HDFS $OUTPUT_HDFS
 
 leave_bench

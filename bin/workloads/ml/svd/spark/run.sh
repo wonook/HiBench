@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/svd.conf
 
 enter_bench SVD ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.SVDExample --numFeatures $NUM_FEATURES_SVD --numSingularValues $NUM_SINGULAR_VALUES_SVD --computeU $COMPUTEU_SVD --maxResultSize $MAXRESULTSIZE_SVD $INPUT_HDFS 
+run_spark_job com.intel.hibench.sparkbench.ml.SVDExample --numFeatures $NUM_FEATURES_SVD --numSingularValues $NUM_SINGULAR_VALUES_SVD --computeU $COMPUTEU_SVD --maxResultSize $MAXRESULTSIZE_SVD $STORAGE_LEVEL_DEFAULT $INPUT_HDFS 
 
 leave_bench

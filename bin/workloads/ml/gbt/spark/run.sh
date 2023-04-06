@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/gbt.conf
 
 enter_bench GradientBoostingTree ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.GradientBoostedTree --numClasses $NUM_CLASSES_GBT --maxDepth $MAX_DEPTH_GBT --maxBins $MAX_BINS_GBT --numIterations $NUM_ITERATIONS_GBT --learningRate $LEARNING_RATE_GBT $INPUT_HDFS
+run_spark_job com.intel.hibench.sparkbench.ml.GradientBoostedTree --numClasses $NUM_CLASSES_GBT --maxDepth $MAX_DEPTH_GBT --maxBins $MAX_BINS_GBT --numIterations $NUM_ITERATIONS_GBT --learningRate $LEARNING_RATE_GBT $STORAGE_LEVEL_DEFAULT $INPUT_HDFS
 
 leave_bench

@@ -63,6 +63,7 @@ HiBenchEnvPropMapping=dict(
     SPARK_YARN_EXECUTOR_MEMORY="spark.executor.memory",
     SPARK_YARN_DRIVER_MEMORY="spark.driver.memory",
     DATA_HDFS="hibench.hdfs.data.dir",
+    STORAGE_LEVEL_DEFAULT="hibench.storage.level"
     # For Sleep workload
     MAP_SLEEP_TIME="hibench.sleep.mapper.seconds",
     RED_SLEEP_TIME="hibench.sleep.reducer.seconds",

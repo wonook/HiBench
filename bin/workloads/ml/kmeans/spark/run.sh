@@ -23,6 +23,6 @@ workload_config=${root_dir}/conf/workloads/ml/kmeans.conf
 enter_bench ScalaSparkKmeans ${workload_config} ${current_dir}
 
 
-run_spark_job com.intel.hibench.sparkbench.ml.DenseKMeans -k $K --numIterations $MAX_ITERATION --storageLevel $K_STORAGE_LEVEL --initMode $K_INIT_MODE $INPUT_HDFS/samples
+run_spark_job com.intel.hibench.sparkbench.ml.DenseKMeans -k $K --numIterations $MAX_ITERATION $STORAGE_LEVEL_DEFAULT --initMode $K_INIT_MODE $INPUT_HDFS/samples
 
 leave_bench

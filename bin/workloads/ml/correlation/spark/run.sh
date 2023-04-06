@@ -22,6 +22,6 @@ workload_config=${root_dir}/conf/workloads/ml/correlation.conf
 enter_bench Correlation ${workload_config} ${current_dir}
 
 run_spark_job com.intel.hibench.sparkbench.ml.CorrelationExample \
-    --corrType ${CORR_TYPE} ${INPUT_HDFS}
+    $STORAGE_LEVEL_DEFAULT --corrType ${CORR_TYPE} ${INPUT_HDFS}
 
 leave_bench

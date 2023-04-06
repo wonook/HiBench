@@ -29,7 +29,7 @@ INPUT_PARQUET_FILE=${INPUT_HDFS}.parquet
 
 SIZE=`dir_size $INPUT_PARQUET_FILE`
 START_TIME=`timestamp`
-run_spark_job com.intel.hibench.sparkbench.ml.NaiveBayesExample ${INPUT_PARQUET_FILE}
+run_spark_job com.intel.hibench.sparkbench.ml.NaiveBayesExample $STORAGE_LEVEL_DEFAULT ${INPUT_PARQUET_FILE}
 
 leave_bench
 

@@ -27,7 +27,7 @@ OPTION="--rank $RANK_ALS \
         --implicitPrefs $IMPLICITPREFS_ALS \
         --numProductBlocks $PRODUCTBLOCKS_ALS \
         --numUserBlocks $USERBLOCKS_ALS \
-        --lambda $LAMBDA_ALS"
+        --lambda $LAMBDA_ALS $STORAGE_LEVEL_DEFAULT"
 run_spark_job com.intel.hibench.sparkbench.ml.ALSExample $OPTION $INPUT_HDFS
 
 leave_bench

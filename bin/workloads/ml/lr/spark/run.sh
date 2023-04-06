@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/lr.conf
 
 enter_bench LogisticRegression ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.LogisticRegression ${INPUT_HDFS}
+run_spark_job com.intel.hibench.sparkbench.ml.LogisticRegression $STORAGE_LEVEL_DEFAULT ${INPUT_HDFS}
 
 leave_bench

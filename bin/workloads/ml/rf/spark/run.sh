@@ -26,7 +26,7 @@ OPTION="--numTrees $NUM_TREES_RF \
         --featureSubsetStrategy $FEATURE_SUBSET_STRATEGY_RF \
         --impurity $IMPURITY_RF \
         --maxDepth $MAX_DEPTH_RF \
-        --maxBins $MAX_BINS_RF"
+        --maxBins $MAX_BINS_RF $STORAGE_LEVEL_DEFAULT"
 run_spark_job com.intel.hibench.sparkbench.ml.RandomForestClassification $OPTION $INPUT_HDFS
 
 leave_bench

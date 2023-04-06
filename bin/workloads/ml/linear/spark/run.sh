@@ -23,6 +23,6 @@ enter_bench LinearRegression ${workload_config} ${current_dir}
 
 run_spark_job com.intel.hibench.sparkbench.ml.LinearRegressionWithElasticNet \
     --regParam ${REG_PARAM_LINEAR} --elasticNetParam ${ELASTICNET_PARAM_LINEAR} \
-    --maxIter ${NUM_ITERATIONS_LINEAR} --tol ${TOL_LINEAR} ${INPUT_HDFS}
+    $STORAGE_LEVEL_DEFAULT --maxIter ${NUM_ITERATIONS_LINEAR} --tol ${TOL_LINEAR} ${INPUT_HDFS}
 
 leave_bench

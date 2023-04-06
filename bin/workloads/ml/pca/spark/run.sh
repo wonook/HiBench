@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/pca.conf
 
 enter_bench PCA ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.PCAExample --k ${PCA_K} --maxResultSize ${MAX_RESULT_SIZE_PCA} ${INPUT_HDFS}
+run_spark_job com.intel.hibench.sparkbench.ml.PCAExample --k ${PCA_K} --maxResultSize ${MAX_RESULT_SIZE_PCA} $STORAGE_LEVEL_DEFAULT ${INPUT_HDFS}
 
 leave_bench

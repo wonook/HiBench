@@ -540,9 +540,9 @@ function printFullLog(){
 function execute_withlog () {
     CMD="$@"
     if [ -t 1 ] ; then          # Terminal, beautify the output.
-        ${workload_func_bin}/execute_with_log.py ${WORKLOAD_RESULT_FOLDER}/bench.log $CMD
+        timeout 20m ${workload_func_bin}/execute_with_log.py ${WORKLOAD_RESULT_FOLDER}/bench.log $CMD
     else                        # pipe, do nothing.
-        $CMD
+        timeout 20m $CMD
     fi
 }
 

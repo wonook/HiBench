@@ -21,6 +21,6 @@ workload_config=${root_dir}/conf/workloads/ml/xgboost.conf
 
 enter_bench XGBoost ${workload_config} ${current_dir}
 
-run_spark_job com.intel.hibench.sparkbench.ml.XGBoost --numClasses $NUM_CLASSES_XGBOOST --maxDepth $MAX_DEPTH_XGBOOST --maxBins $MAX_BINS_XGBOOST --numIterations $NUM_ITERATIONS_XGBOOST --learningRate $LEARNING_RATE_XGBOOST $INPUT_HDFS
+run_spark_job com.intel.hibench.sparkbench.ml.XGBoost --numClasses $NUM_CLASSES_XGBOOST --maxDepth $MAX_DEPTH_XGBOOST --maxBins $MAX_BINS_XGBOOST --numIterations $NUM_ITERATIONS_XGBOOST --learningRate $LEARNING_RATE_XGBOOST $STORAGE_LEVEL_DEFAULT $INPUT_HDFS
 
 leave_bench
